@@ -1,0 +1,175 @@
+/* Custom styles for LED Driver Calculator */
+
+/* Header and footer */
+.header-logo {
+    max-height: 40px;
+}
+
+.language-switcher {
+    margin-left: auto;
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+/* Results section */
+.results-card {
+    margin-top: 2rem;
+    display: none;
+}
+
+/* Loading indicator */
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Error message */
+.error-message {
+    color: var(--bs-danger);
+    margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+}
+
+/* Custom styling for card visualization */
+.result-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--bs-info);
+}
+
+.result-label {
+    font-size: 1rem;
+    color: var(--bs-light);
+}
+
+/* Schema.org structured data styles */
+.schema-data {
+    display: none;
+}
+
+/* Saved calculations styles */
+.saved-calculation {
+    border-left: 3px solid var(--bs-info);
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.saved-calculation:hover {
+    background-color: var(--bs-dark);
+    transform: translateX(2px);
+}
+
+.saved-calculation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--bs-gray-700);
+}
+
+.saved-calculation-body {
+    padding: 1rem;
+}
+
+.saved-calculation-name {
+    font-weight: bold;
+    color: var(--bs-info);
+}
+
+.saved-calculation-actions button {
+    margin-left: 0.5rem;
+}
+
+/* Real-time length display */
+.real-time-length {
+    background-color: var(--bs-dark);
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--bs-info);
+    border: 1px solid var(--bs-gray-700);
+}
+
+/* Length unit selector */
+.input-group-text.unit-selector {
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+    border-color: var(--bs-gray-700);
+    cursor: pointer;
+}
+
+.additional-info-row {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--bs-gray-700);
+    padding-top: 1rem;
+}
+
+/* Save calculation modal */
+.modal-content {
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+    border: 1px solid var(--bs-gray-700);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--bs-gray-700);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--bs-gray-700);
+}
+
+/* Custom range input for density */
+.density-slider {
+    width: 100%;
+}
+
+.density-value {
+    width: 50px;
+    display: inline-block;
+    text-align: center;
+    margin-left: 1rem;
+    font-weight: bold;
+    color: var(--bs-info);
+}
+
+/* Usage tips section */
+.tips-icon {
+    color: var(--bs-warning);
+    margin-right: 0.5rem;
+}
+
+.tip-item {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.tip-item::before {
+    content: "•";
+    position: absolute;
+    left: 0.5rem;
+    color: var(--bs-warning);
+}
+
+/* Density tooltip */
+.density-tooltip {
+    cursor: help;
+    margin-left: 0.5rem;
+    color: var(--bs-info);
+}
