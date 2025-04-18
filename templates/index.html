@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card bg-dark shadow-sm mb-4">
+            <div class="card-header">
+                <h2 class="h5 mb-0" data-i18n="input_parameters">Input Parameters</h2>
+            </div>
+            <div class="card-body">
+                <form id="led-form">
+                    <div class="mb-3">
+                        <label for="voltage" class="form-label" data-i18n="voltage_label">Voltage (V)</label>
+                        <select class="form-select" id="voltage" required>
+                            <option value="5">5V</option>
+                            <option value="12" selected>12V</option>
+                            <option value="24">24V</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                        <input type="number" class="form-control mt-2 d-none" id="custom-voltage" min="1" step="0.1" placeholder="Enter custom voltage">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="density" class="form-label" data-i18n="density_label">LED Density (LEDs/m)</label>
+                        <span class="density-tooltip" data-bs-toggle="tooltip" title="Common densities: 30, 60, 120, 144, 240 LEDs/m">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                            </svg>
+                        </span>
+                        <div class="mt-2">
+                            <select class="form-select mb-2" id="density-select">
+                                <option value="slider">Custom (Slider)</option>
+                                <option value="30">30 LEDs/m</option>
+                                <option value="60" selected>60 LEDs/m</option>
+                                <option value="90">90 LEDs/m</option>
+                                <option value="120">120 LEDs/m</option>
+                                <option value="144">144 LEDs/m</option>
+                                <option value="150">150 LEDs/m</option>
+                                <option value="180">180 LEDs/m</option>
+                                <option value="210">210 LEDs/m</option>
+                                <option value="240">240 LEDs/m</option>
+                            </select>
+                            <div class="d-flex align-items-center" id="density-slider-container">
+                                <input type="range" class="form-range density-slider" id="density-slider" min="30" max="240" step="1" value="60">
+                                <div class="density-value" id="density-value">60</div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="density" value="60">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="length" class="form-label" data-i18n="length_label">Strip Length</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="length" min="0.1" step="0.1" value="5" required>
+                            <span class="input-group-text unit-selector" id="length-unit-display">m</span>
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span data-i18n="length_unit">Unit</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" data-unit="m">m</a></li>
+                                <li><a class="dropdown-item" href="#" data-unit="cm">cm</a></li>
+                                <li><a class="dropdown-item" href="#" data-unit="in">in</a></li>
+                                <li><a class="dropdown-item" href="#" data-unit="ft">ft</a></li>
+                            </ul>
+                        </div>
+                        <input type="hidden" id="length-unit" value="m">
+                        <div class="real-time-length mt-2 d-none" id="real-time-length">
+                            <span data-i18n="real_time_length">Total Length in Meters</span>: <span id="meters-value">5</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Number of strips is now hidden with default value 1 -->
+                    <input type="hidden" id="pieces" value="1">
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary" id="calculate-btn" data-i18n="calculate_button">Calculate</button>
+                    </div>
+                    
+                    <div id="error-message" class="alert alert-danger mt-3 d-none"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <!-- Loading indicator -->
+        <div id="loading-indicator" class="d-none text-center my-5">
+            <div class="spinner-border text-info loading-spinner" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Calculating...</p>
+        </div>
+        
+        <!-- Results section -->
+        <div id="results-section" class="d-none">
+            <div class="card bg-dark shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0" id="results-title">Calculation Results</h2>
+                    <button class="btn btn-sm btn-outline-info" id="save-calculation-btn" data-i18n="save_calculation">Save Calculation</button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Total Power -->
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <div class="result-value" id="power-value">0 Watts</div>
+                                <div class="result-label" id="power-label">Total Power</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Draw -->
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <div class="result-value" id="current-value">0 Amps</div>
+                                <div class="result-label" id="current-label">Current Draw</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recommended Driver -->
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border border-secondary rounded bg-dark">
+                                <div class="result-value text-warning" id="recommended-value">0 Amps</div>
+                                <div class="result-value text-info mt-1" id="standard-driver-value">0A</div>
+                                <div class="result-label" id="recommended-label">Recommended Driver</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row additional-info-row mt-4">
+                        <!-- Total Length -->
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <div class="result-value" id="total-length-value">0 m</div>
+                                <div class="result-label" id="total-length-label">Total Length</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Wire Gauge -->
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <div class="result-value" id="wire-gauge-value">22 AWG</div>
+                                <div class="result-label" id="wire-gauge-label">Recommended Wire</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Max Run Length -->
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <div class="result-value" id="max-run-value">0 m</div>
+                                <div class="result-label" id="max-run-label">Maximum Run Length</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 small text-muted">
+                        <p>The recommended driver capacity includes a 20% safety margin to ensure stable operation and extend the lifespan of your LED installation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Saved calculations section -->
+        <div class="card bg-dark shadow-sm mt-4" id="saved-calculations-container">
+            <div class="card-header">
+                <h2 class="h5 mb-0" data-i18n="saved_calculations">Saved Calculations</h2>
+            </div>
+            <div class="card-body">
+                <div id="saved-calculations-list">
+                    <p class="text-muted" data-i18n="no_saved_calculations">No saved calculations yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Usage tips section -->
+<div class="card bg-dark shadow-sm mt-4">
+    <div class="card-header">
+        <h2 class="h5 mb-0" data-i18n="usage_tips_title">Usage Tips</h2>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 class="h6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightbulb tips-icon" viewBox="0 0 16 16">
+                        <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z"/>
+                    </svg>
+                    Input Parameters
+                </h3>
+                <div class="tip-item">
+                    <strong>Voltage:</strong> Choose between common voltages (5V, 12V, 24V) or enter a custom value
+                </div>
+                <div class="tip-item">
+                    <strong>LED Density:</strong> Slide to select any density between 30-240 LEDs/meter
+                </div>
+                <div class="tip-item">
+                    <strong>Length:</strong> Enter length in your preferred unit (meters, centimeters, inches, feet)
+                </div>
+                <div class="tip-item">
+                    <strong>Standard Driver Sizes:</strong> 3A, 5A, 8.5A, 10A, 12.5A, 16.5A, 20A, 25A, 30A, 33A
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3 class="h6">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle tips-icon" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                    Installation Advice
+                </h3>
+                <div class="tip-item">
+                    <strong>Wire Gauge:</strong> Use the recommended wire thickness to minimize voltage drop
+                </div>
+                <div class="tip-item">
+                    <strong>Maximum Run:</strong> Keep continuous runs under this length to avoid voltage drop
+                </div>
+                <div class="tip-item">
+                    <strong>Power Injection:</strong> For long runs, inject power at both ends or at regular intervals
+                </div>
+                <div class="tip-item">
+                    <strong>Driver Selection:</strong> Choose a driver with capacity equal to or greater than the recommended value
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save calculation modal -->
+<div class="modal fade" id="save-calculation-modal" tabindex="-1" aria-labelledby="save-calculation-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="save-calculation-modal-label" data-i18n="save_calculation">Save Calculation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="calculation-name" class="form-label" data-i18n="calculation_name">Calculation Name</label>
+                    <input type="text" class="form-control" id="calculation-name" placeholder="e.g., Living Room LED Project">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel_button">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-calculation-confirm" data-i18n="save_button">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
